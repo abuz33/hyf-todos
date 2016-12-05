@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>HYF Todos</title>
+  <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <link rel="stylesheet" href="node_modules/angular-material/angular-material.css">
+  <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style type="text/css">
+    /**
+   * Hide when Angular is not yet loaded and initialized
+   */
+    [ng\:cloak],
+    [ng-cloak],
+    [data-ng-cloak],
+    [x-ng-cloak],
+    .ng-cloak,
+    .x-ng-cloak {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body ng-app="app" ng-cloak ng-controller="appController as $ctrl">
+
+<md-toolbar class="md-whiteframe-2dp">
+  <div class="md-toolbar-tools" flex-offset-gt-sm="20" flex-gt-sm="60">
+    <h2>
+      <span>{{$ctrl.appTitle}}</span>
+    </h2>
+  </div>
+</md-toolbar>
+
+<md-content flex layout-align="center">
+  <md-list flex-offset-gt-sm="20" flex-gt-sm="60">
+    <hyf-todo-item ng-repeat="todo in $ctrl.todos" todo="todo"></hyf-todo-item>
+  </md-list>
+</md-content>
+
+<script src="node_modules/angular/angular.js"></script>
+<script src="node_modules/angular-aria/angular-aria.js"></script>
+<script src="node_modules/angular-animate/angular-animate.js"></script>
+<script src="node_modules/angular-material/angular-material.js"></script>
+<script src="app/app.module.js"></script>
+<script src="app/app.controller.js"></script>
+<script src="app/todo.service.js"></script>
+<script src="app/todo-item.component.js"></script>
+</body>
+</html>

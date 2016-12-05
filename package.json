@@ -1,0 +1,21 @@
+{
+  "name": "todoserver",
+  "version": "1.0.0",
+  "description": "A node and MySQL todo server ",
+  "main": "todosServer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "^1.5.9",
+    "angular-animate": "^1.5.9",
+    "angular-aria": "^1.5.9",
+    "angular-material": "^1.1.1",
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "mongodb": "^2.2.12",
+    "mysql": "^2.11.1"
+  }
+}
