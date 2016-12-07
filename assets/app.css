@@ -1,0 +1,12 @@
+.placeholder-text {
+  color: darkgray;
+  font-style: italic;
+}
+
+.todo-done {
+  text-decoration: line-through;
+}
+
+.text-muted {
+  color: darkgray;
+}
