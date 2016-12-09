@@ -14,7 +14,7 @@
     <div flex-offset-gt-sm="20" flex-gt-sm="60">
       <md-list>
         <md-subheader>Users assigned to todo '{{$ctrl.todo.text}}'</md-subheader>
-        <hyf-todo-users-item ng-repeat="user in $ctrl.users track by user._id" user="user"
+        <hyf-todo-users-item ng-repeat="user in $ctrl.todo.users track by user._id" user="user"
                              todo="$ctrl.todo"></hyf-todo-users-item>
       </md-list>
     </div>

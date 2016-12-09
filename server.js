@@ -4,15 +4,20 @@ const bodyParser = require('body-parser');
 const port = 8080;
 
 let dbtype;
+let dbname;
 let password = null;
 
-if (process.argv.length == 3 && process.argv[2] === 'mongo') {
+let argLen = process.argv.length;
+
+if (argLen >= 3 && process.argv[2] === 'mongo') {
     dbtype = 'mongo';
-} else if (process.argv.length == 4 && process.argv[2] === 'mysql') {
+    dbname = (argLen >= 4 && process.argv[3] === 'test') ? 'hyf-todos-test' : 'hyf-todos';
+} else if (argLen >= 4 && process.argv[2] === 'mysql') {
     dbtype = 'mysql';
     password = process.argv[3];
+    dbname = (argLen >= 5 && process.argv[4] === 'test') ? 'hyf-todos-test' : 'hyf-todos';
 } else {
-    console.log('to run, type: node server.js [mongo | mysql <password>]');
+    console.log('to run, type: node database.js mongo [test]| mysql <password> [test]');
     process.exit();
 }
 
@@ -20,10 +25,10 @@ let database;
 
 switch (dbtype) {
     case 'mongo':
-        database = require('./databases/mongo.database');
+        database = require('./database/mongo.database.js');
         break;
     case 'mysql':
-        database = require('./databases/mysql.database');
+        database = require('./database/mysql.database.js');
         break;
     default:
         console.error('unsupported database type: ' + dbtype);
@@ -31,7 +36,7 @@ switch (dbtype) {
 }
 
 // Try and open the database, exit on failure
-database.openDatabase(password)
+database.openDatabase(dbname, password)
     .catch((err) => {
         console.log(err);
         process.exit();
@@ -50,7 +55,7 @@ app.get('/', sendIndexHtml);
 app.get('/todo/:id', getTodoById);
 app.get('/todo', getTodos);
 app.post('/todo', addTodo);
-app.put('/todo', updateTodo);
+app.put('/todo/:id', updateTodo);
 app.delete('/todo/:id', deleteTodo);
 app.delete('/todo', deleteAllTodos);
 
@@ -59,19 +64,20 @@ app.put('/user/:id/:todo_id', assignTodoToUser);
 app.delete('/user/:id/:todo_id', unassignTodoFromUser);
 app.get('/user', getUsers);
 app.post('/user', addUser);
-app.put('/user', updateUser);
+app.put('/user/:id', updateUser);
 app.delete('/user/:id', deleteUser);
+app.delete('/user', deleteAllUsers);
 
 app.use(express.static(__dirname));
 
-// Start the server
+// Start the database
 
 app.listen(port, (err) => {
     if (err) {
-        console.log('could no start server: ', err);
+        console.log('could no start database: ', err);
         process.exit(1);
     }
-    console.log('server listening at port ' + port);
+    console.log('database listening at port ' + port);
 });
 
 //////// Request handlers
@@ -82,12 +88,8 @@ function sendIndexHtml(req, res) {
 
 function getTodos(req, res) {
     database.getTodos()
-        .then(todos => {
-            res.json({todos: todos});
-        })
-        .catch(err => {
-            res.status(400).json(err);
-        });
+        .then(todos => res.json({todos: todos}))
+        .catch(err => res.status(400).json(err));
 }
 
 function getTodoById(req, res) {
@@ -95,14 +97,15 @@ function getTodoById(req, res) {
         res.status(400).send('id parameter is required');
         return;
     }
-
     database.getTodoById(req.params.id)
         .then(todo => {
-            res.json(todo);
+            return database.getUsers()
+                .then(users => {
+                    todo.users = users;
+                    res.json(todo);
+                });
         })
-        .catch(err => {
-            res.status(400).json(err);
-        });
+        .catch(err => res.status(400).json(err));
 }
 
 function addTodo(req, res) {
@@ -111,12 +114,9 @@ function addTodo(req, res) {
         res.status(400).send('no text specified');
         return;
     }
-
     database.addTodo(todo)
-        .then(() => {
-            console.log('todo added')
-            res.sendStatus(200);
-        })
+        .then(() => database.getTodos())
+        .then(todos => res.json({todos: todos}))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -125,47 +125,39 @@ function deleteTodo(req, res) {
         res.status(400).send('id parameter is required');
         return;
     }
-
     database.deleteTodo(req.params.id)
-        .then(() => {
-            console.log(`todo with id ${req.params.id} deleted`)
-            res.sendStatus(200);
-        })
+        .then(() => database.getTodos())
+        .then(todos => res.json({todos: todos}))
         .catch(err => res.status(400).send(err.message));
 }
 
 function updateTodo(req, res) {
+    if (!req.params.id) {
+        res.status(400).send('id parameter is required');
+        return;
+    }
+
     let todo = req.body;
     if (!todo.text) {
         res.status(400).send('no text specified');
         return;
     }
 
-    database.updateTodo(todo)
-        .then(() => {
-            console.log('todo updated')
-            res.sendStatus(200);
-        })
+    database.updateTodo(req.params.id, todo)
+        .then(() => res.sendStatus(200))
         .catch(err => res.status(400).send(err.message));
 }
 
 function deleteAllTodos(req, res) {
     database.deleteAllTodos()
-        .then(() => {
-            console.log('all todos deleted')
-            res.sendStatus(200);
-        })
+        .then(() => res.sendStatus(200))
         .catch(err => res.status(400).send(err.message));
 }
 
 function getUsers(req, res) {
     database.getUsers()
-        .then(users => {
-            res.json({users: users});
-        })
-        .catch(err => {
-            res.status(400).json(err);
-        });
+        .then(users => res.json({users: users}))
+        .catch(err => res.status(400).json(err));
 }
 
 function getUserById(req, res) {
@@ -173,14 +165,15 @@ function getUserById(req, res) {
         res.status(400).send('id parameter is required');
         return;
     }
-
     database.getUserById(req.params.id)
         .then(user => {
-            res.json(user);
+            return database.getTodos()
+                .then(todos => {
+                    user.todos = todos;
+                    res.json(user);
+                });
         })
-        .catch(err => {
-            res.status(400).json(err);
-        });
+        .catch(err => res.status(400).json(err));
 }
 
 function addUser(req, res) {
@@ -189,12 +182,9 @@ function addUser(req, res) {
         res.status(400).send('no name specified');
         return;
     }
-
     database.addUser(user)
-        .then(() => {
-            console.log(`user ${user.name} added`);
-            res.sendStatus(200);
-        })
+        .then(() => database.getUsers())
+        .then(users => res.json({users: users}))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -203,27 +193,33 @@ function deleteUser(req, res) {
         res.status(400).send('id parameter is required');
         return;
     }
-
     database.deleteUser(req.params.id)
-        .then(() => {
-            console.log(`user with id ${req.params.id} deleted`);
-            res.sendStatus(200);
-        })
+        .then(() => database.getUsers())
+        .then(users => res.json({users: users}))
         .catch(err => res.status(400).send(err.message));
 }
 
 function updateUser(req, res) {
+    if (!req.params.id) {
+        res.status(400).send('id parameter is required');
+        return;
+    }
     let user = req.body;
     if (!user.name) {
         res.status(400).send('no name specified');
         return;
     }
-
-    database.updateUser(user)
+    database.updateUser(req.params.id, user)
         .then(() => {
             console.log(`user ${user.name} updated`);
             res.sendStatus(200);
         })
+        .catch(err => res.status(400).send(err.message));
+}
+
+function deleteAllUsers(req, res) {
+    database.deleteAllUsers()
+        .then(() => res.sendStatus(200))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -236,15 +232,9 @@ function assignTodoToUser(req, res) {
         res.status(400).send('todo_id parameter is required');
         return;
     }
-
     database.assignUserToTodo(req.params.id, req.params.todo_id)
-        .then(user => {
-            console.log(`assigned user #${req.params.id} to todo #${req.params.todo_id}`);
-            res.json(user);
-        })
-        .catch(err => {
-            res.status(400).json(err);
-        });
+        .then(user => res.json(user))
+        .catch(err => res.status(400).json(err));
 }
 
 function unassignTodoFromUser(req, res) {
@@ -256,13 +246,11 @@ function unassignTodoFromUser(req, res) {
         res.status(400).send('todo_id parameter is required');
         return;
     }
-
     database.unassignUserFromTodo(req.params.id, req.params.todo_id)
-        .then(user => {
-            console.log(`unassigned user #${req.params.id} from todo #${req.params.todo_id}`);
-            res.json(user);
-        })
-        .catch(err => {
-            res.status(400).json(err);
-        });
+        .then(user => res.json(user))
+        .catch(err => res.status(400).json(err));
+}
+
+module.exports = {
+    dbname: dbname
 }

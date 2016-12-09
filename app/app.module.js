@@ -16,22 +16,6 @@
             .state('home', {
                 url: '/?tab',
                 component: 'hyfHome'
-            })
-            .state('todos', {
-                url: '/todo',
-                component: 'hyfTodos'
-            })
-            .state('todoUsers', {
-                url: '/todo/:id',
-                component: 'hyfTodoUsers'
-            })
-            .state('users', {
-                url: '/users',
-                component: 'hyfUsers'
-            })
-            .state('userTodos', {
-                url: '/user/:id',
-                component: 'hyfUserTodos'
             });
     }
 

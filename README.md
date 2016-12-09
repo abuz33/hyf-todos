@@ -18,13 +18,13 @@ Clone the repository to your local hard drive and run `npm install` to install t
 
 Before starting the program with Mongo, please ensure that the MongoDB is installed abd the `mongod` demon is running.
 
-Type: `node server.js mongo`
+Type: `node server/server.js mongo [test]`
 
 ### Start with MySQL
 
 For MySQL, please create an empty database with the name `hyf-todos`. The assumed database user is `root`.
 
-Type: `node server.js mysql <password>`
+Type: `node server/server.js mysql <password> [test]`
 
 where `<password>` is the password that you assigned to the `hyf-todos` database.
 

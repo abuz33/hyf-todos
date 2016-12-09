@@ -2,13 +2,15 @@
 const assert = require('assert');
 const mongo = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID
-const mongoUrl = 'mongodb://localhost:27017/hyf-todos';
+let mongoUrl;
 
 let linkCollection;
 let todoCollection;
 let userCollection;
 
-function openDatabase() {
+function openDatabase(dbname) {
+    mongoUrl = 'mongodb://localhost:27017/' + dbname;
+
     return mongo.connect(mongoUrl)
         .then(db => {
             todoCollection = db.collection('todos');
@@ -27,27 +29,24 @@ function getTodos() {
 }
 
 function addTodo(todo) {
-    return todoCollection.insertOne(todo);
+    return todoCollection.insertOne(todo)
+        .then(result => result.insertedId);
 }
 
-function updateTodo(todo) {
-    let todoObjectId = new ObjectID(todo._id);
+function updateTodo(id, todo) {
+    let todoObjectId = new ObjectID(id);
     return todoCollection.findOneAndUpdate({_id: todoObjectId}, {$set: {text: todo.text, done: todo.done}});
 }
 
 function deleteTodo(id) {
     let todoObjectId = new ObjectID(id);
     return linkCollection.deleteMany({todo_id: todoObjectId})
-        .then(() => {
-            return todoCollection.deleteOne({_id: todoObjectId});
-        });
+        .then(() => todoCollection.deleteOne({_id: todoObjectId}));
 }
 
 function deleteAllTodos() {
     return linkCollection.deleteMany({})
-        .then(() => {
-            return todoCollection.deleteMany({});
-        });
+        .then(() => todoCollection.deleteMany({}));
 }
 
 function getTodoById(id) {
@@ -71,20 +70,24 @@ function getUsers() {
 }
 
 function addUser(user) {
-    return userCollection.insertOne(user);
+    return userCollection.insertOne(user)
+        .then(result => result.insertedId);
 }
 
-function updateUser(user) {
-    let userObjectId = new ObjectID(user._id);
+function updateUser(id, user) {
+    let userObjectId = new ObjectID(id);
     return userCollection.findOneAndUpdate({_id: userObjectId}, {$set: {name: user.name}});
 }
 
 function deleteUser(id) {
     let userObjectId = new ObjectID(id);
     return linkCollection.deleteMany({user_id: userObjectId})
-        .then(() => {
-            return userCollection.deleteOne({_id: userObjectId});
-        });
+        .then(() => userCollection.deleteOne({_id: userObjectId}));
+}
+
+function deleteAllUsers() {
+    return linkCollection.deleteMany({})
+        .then(() => userCollection.deleteMany({}));
 }
 
 function getUserById(id) {
@@ -132,6 +135,7 @@ module.exports = {
     addUser: addUser,
     updateUser: updateUser,
     deleteUser: deleteUser,
+    deleteAllUsers: deleteAllUsers,
     getUserById: getUserById,
     assignUserToTodo: assignUserToTodo,
     unassignUserFromTodo: unassignUserFromTodo

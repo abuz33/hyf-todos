@@ -7,9 +7,9 @@
             controller: UsersController
         });
 
-    UsersController.$inject = ['$rootScope', '$mdDialog', '$q', '$window', 'backendService'];
+    UsersController.$inject = ['$rootScope', '$mdDialog', '$window', 'backendService'];
 
-    function UsersController($rootScope, $mdDialog, $q, $window, backendService) {
+    function UsersController($rootScope, $mdDialog, $window, backendService) {
 
         //////// View Model ////////
 
@@ -54,12 +54,14 @@
                 .targetEvent(ev)
                 .ok('Add')
                 .cancel('Cancel');
-
             $mdDialog.show(confirm)
                 .then(function (name) {
-                    backendService.addUser({name: name})
-                        .then(activate);
-                }, function () {
+                    return backendService.addUser({name: name});
+                })
+                .then(function (data) {
+                    ctrl.users = data.users;
+                })
+                .catch( function () {
                     console.log('Add new user was cancelled');
                 });
         }
@@ -85,11 +87,13 @@
                         .cancel('Cancel');
                     return $mdDialog.show(confirm)
                         .then(function () {
-                            return backendService.deleteUser(user._id)
-                                .then(activate)
-                        }, function () {
+                            return backendService.deleteUser(user._id);
+                        })
+                        .then(function (data) {
+                            ctrl.users = data.users;
+                        })
+                        .catch(function () {
                             console.log('Delete user was cancelled');
-                            return $q.resolve();
                         });
                 })
                 .catch(function (err) {

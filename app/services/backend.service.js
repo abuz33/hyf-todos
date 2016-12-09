@@ -36,13 +36,16 @@
 
         function addTodo(todo) {
             return $http.post('/todo', todo)
+                .then(function (data) {
+                    return data.data;
+                })
                 .catch(function (err) {
                     handleFailure(err, 'addTodo');
                 });
         }
 
         function updateTodo(todo) {
-            return $http.put('/todo', todo)
+            return $http.put('/todo/' + todo._id, {text: todo.text, done: todo.done})
                 .catch(function (err) {
                     handleFailure(err, 'updateTodo');
                 });
@@ -50,6 +53,9 @@
 
         function deleteTodo(id) {
             return $http.delete('/todo/' + id)
+                .then(function (data) {
+                    return data.data;
+                })
                 .catch(function (err) {
                     handleFailure(err, 'deleteTodo');
                 });
@@ -72,7 +78,6 @@
                 });
         }
 
-
         function getUsers() {
             return $http.get('/user')
                 .then(function (data) {
@@ -85,13 +90,16 @@
 
         function addUser(user) {
             return $http.post('/user', user)
+                .then(function (data) {
+                    return data.data;
+                })
                 .catch(function (err) {
                     handleFailure(err, 'addUser');
                 });
         }
 
         function updateUser(user) {
-            return $http.put('/user', user)
+            return $http.put('/user/' + user._id, {name: user.name})
                 .catch(function (err) {
                     handleFailure(err, 'updateUser');
                 });
@@ -99,6 +107,9 @@
 
         function deleteUser(id) {
             return $http.delete('/user/' + id)
+                .then(function (data) {
+                    return data.data;
+                })
                 .catch(function (err) {
                     handleFailure(err, 'deleteUser');
                 });

@@ -4,12 +4,12 @@ const mysql = require('mysql');
 let connection;
 let databaseOpened = false;
 
-function openDatabase(password) {
+function openDatabase(dbname, password) {
     connection = mysql.createConnection({
         host: 'localhost',
         user: 'root',
         password: password,
-        database: 'hyf-todos'
+        database: dbname
     });
     return connectToDatabase()
         .then(() => createTables());
@@ -71,25 +71,22 @@ function getTodos() {
 }
 
 function addTodo(todo) {
-    return execQuery('INSERT INTO todos (text, done) VALUES(?,?)', [todo.text, todo.done ? 1 : 0]);
+    return execQuery('INSERT INTO todos (text, done) VALUES(?,?)', [todo.text, todo.done ? 1 : 0])
+        .then(result => result.insertId);
 }
 
-function updateTodo(todo) {
-    return execQuery('UPDATE todos SET text=?, done=? WHERE _id=?', [todo.text, todo.done ? 1 : 0, todo._id]);
+function updateTodo(id, todo) {
+    return execQuery('UPDATE todos SET text=?, done=? WHERE _id=?', [todo.text, todo.done ? 1 : 0, id]);
 }
 
 function deleteTodo(id) {
     return execQuery('DELETE FROM todo_user_links WHERE todo_id=?', [id])
-        .then(() => {
-            return execQuery('DELETE FROM todos WHERE _id=?', [id]);
-        });
+        .then(() =>  execQuery('DELETE FROM todos WHERE _id=?', [id]));
 }
 
 function deleteAllTodos() {
     return execQuery('DELETE FROM todo_user_links')
-        .then(() => {
-            return execQuery('DELETE FROM todos');
-        });
+        .then(() => execQuery('DELETE FROM todos'));
 }
 
 function getTodoById(id) {
@@ -119,22 +116,26 @@ function getTodoById(id) {
 // User operations
 
 function getUsers() {
-    return execQuery('SELECT _id, name FROM users ORDER BY name');
+    return execQuery('SELECT _id, name FROM users ORDER BY name')
+        .then(result => result.insertId);
 }
 
 function addUser(user) {
     return execQuery('INSERT INTO users (name) VALUES(?)', [user.name]);
 }
 
-function updateUser(user) {
-    return execQuery('UPDATE users SET name=? WHERE _id=?', [user.name, user._id]);
+function updateUser(id, user) {
+    return execQuery('UPDATE users SET name=? WHERE _id=?', [user.name, id]);
 }
 
 function deleteUser(id) {
     return execQuery('DELETE FROM todo_user_links WHERE user_id=?', [id])
-        .then(() => {
-            return execQuery('DELETE FROM users WHERE _id=?', [id]);
-        });
+        .then(() => execQuery('DELETE FROM users WHERE _id=?', [id]));
+}
+
+function deleteAllUsers() {
+    return execQuery('DELETE FROM todo_user_links')
+        .then(() => execQuery('DELETE FROM users'));
 }
 
 function getUserById(id) {
@@ -196,6 +197,7 @@ module.exports = {
     addUser: addUser,
     updateUser: updateUser,
     deleteUser: deleteUser,
+    deleteAllUsers: deleteAllUsers,
     getUserById: getUserById,
     assignUserToTodo: assignUserToTodo,
     unassignUserFromTodo: unassignUserFromTodo

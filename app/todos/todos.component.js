@@ -1,4 +1,4 @@
-(function() {
+(function () {
     'use strict';
 
     angular.module('app')
@@ -21,13 +21,13 @@
         var deregisterFn;
 
         // listen for an addUser event, emitted by the toolbar of the home component
-        this.$onInit = function() {
+        this.$onInit = function () {
             deregisterFn = $rootScope.$on('addTodo', function (broadcastEvent, mouseEvent) {
                 addTodo(mouseEvent);
             });
         }
 
-        this.$onDestroy = function() {
+        this.$onDestroy = function () {
             deregisterFn();
         }
 
@@ -54,12 +54,14 @@
                 .targetEvent(ev)
                 .ok('Add')
                 .cancel('Cancel');
-
             $mdDialog.show(confirm)
                 .then(function (text) {
-                    backendService.addTodo({text: text, done: false})
-                        .then(activate);
-                }, function () {
+                    return backendService.addTodo({text: text, done: false})
+                })
+                .then(function (data) {
+                    ctrl.todos = data.todos;
+                })
+                .catch(function () {
                     console.log('Add new todo was cancelled');
                 });
         }
@@ -74,7 +76,7 @@
                     } else if (userCount === 1) {
                         message = '\'' + todo.text + '\' is assigned to 1 user.';
                     } else {
-                        message = '\'' + todo.text +  '\' is assigned to ' + userCount + 'users.';
+                        message = '\'' + todo.text + '\' is assigned to ' + userCount + 'users.';
                     }
                     var confirm = $mdDialog.confirm()
                         .title('Delete todo?')
@@ -85,9 +87,12 @@
                         .cancel('Cancel');
                     return $mdDialog.show(confirm)
                         .then(function () {
-                            return backendService.deleteTodo(todo._id)
-                                .then(activate)
-                        }, function () {
+                            return backendService.deleteTodo(todo._id);
+                        })
+                        .then(function (data) {
+                            ctrl.todos = data.todos;
+                        })
+                        .catch(function () {
                             console.log('Delete todo was cancelled');
                             return $q.resolve();
                         });
@@ -95,7 +100,6 @@
                 .catch(function (err) {
                     $window.alert(err.message);
                 });
-
         }
     }
 })();
