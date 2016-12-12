@@ -55,7 +55,7 @@ app.get('/', sendIndexHtml);
 app.get('/todo/:id', getTodoById);
 app.get('/todo', getTodos);
 app.post('/todo', addTodo);
-app.put('/todo/:id', updateTodo);
+app.patch('/todo/:id', updateTodo);
 app.delete('/todo/:id', deleteTodo);
 app.delete('/todo', deleteAllTodos);
 
@@ -64,7 +64,7 @@ app.put('/user/:id/:todo_id', assignTodoToUser);
 app.delete('/user/:id/:todo_id', unassignTodoFromUser);
 app.get('/user', getUsers);
 app.post('/user', addUser);
-app.put('/user/:id', updateUser);
+app.patch('/user/:id', updateUser);
 app.delete('/user/:id', deleteUser);
 app.delete('/user', deleteAllUsers);
 
@@ -144,13 +144,13 @@ function updateTodo(req, res) {
     }
 
     database.updateTodo(req.params.id, todo)
-        .then(() => res.sendStatus(200))
+        .then(() => res.sendStatus(204))
         .catch(err => res.status(400).send(err.message));
 }
 
 function deleteAllTodos(req, res) {
     database.deleteAllTodos()
-        .then(() => res.sendStatus(200))
+        .then(() => res.sendStatus(204))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -212,14 +212,14 @@ function updateUser(req, res) {
     database.updateUser(req.params.id, user)
         .then(() => {
             console.log(`user ${user.name} updated`);
-            res.sendStatus(200);
+            res.sendStatus(204);
         })
         .catch(err => res.status(400).send(err.message));
 }
 
 function deleteAllUsers(req, res) {
     database.deleteAllUsers()
-        .then(() => res.sendStatus(200))
+        .then(() => res.sendStatus(204))
         .catch(err => res.status(400).send(err.message));
 }
 

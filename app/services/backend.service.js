@@ -45,7 +45,7 @@
         }
 
         function updateTodo(todo) {
-            return $http.put('/todo/' + todo._id, {text: todo.text, done: todo.done})
+            return $http.patch('/todo/' + todo._id, {text: todo.text, done: todo.done})
                 .catch(function (err) {
                     handleFailure(err, 'updateTodo');
                 });
@@ -99,7 +99,7 @@
         }
 
         function updateUser(user) {
-            return $http.put('/user/' + user._id, {name: user.name})
+            return $http.patch('/user/' + user._id, {name: user.name})
                 .catch(function (err) {
                     handleFailure(err, 'updateUser');
                 });
