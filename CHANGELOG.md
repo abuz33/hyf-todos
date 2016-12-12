@@ -1,3 +1,8 @@
+## 2016-12-12
+
+- Replaced HTTP PUT method with PATCH method in case of updates
+- Returning HTTP status 204 instead of 200 if not content is returned
+
 ## 2016-12-09
 
 - Added unit testing for the server api endpoints
