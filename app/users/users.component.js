@@ -69,7 +69,7 @@
         function onDelete(id, ev) {
             backendService.getUserById(id)
                 .then(function (user) {
-                    var todosCount = user.todos.length
+                    var todosCount = user.assignedTodos.length
                     var message;
                     if (todosCount === 0) {
                         message = user.name + ' has NO assigned todos.';

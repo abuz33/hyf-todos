@@ -101,7 +101,7 @@ function getTodoById(req, res) {
         .then(todo => {
             return database.getUsers()
                 .then(users => {
-                    todo.users = users;
+                    todo.allUsers = users;
                     res.json(todo);
                 });
         })
@@ -169,7 +169,7 @@ function getUserById(req, res) {
         .then(user => {
             return database.getTodos()
                 .then(todos => {
-                    user.todos = todos;
+                    user.allTodos = todos;
                     res.json(user);
                 });
         })

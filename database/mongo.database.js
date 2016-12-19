@@ -34,14 +34,21 @@ function addTodo(todo) {
 }
 
 function updateTodo(id, todo) {
-    let todoObjectId = new ObjectID(id);
-    return todoCollection.findOneAndUpdate({_id: todoObjectId}, {$set: {text: todo.text, done: todo.done}});
+    return hexStringToObjectID(id)
+        .then(objectID => {
+            let todoFilter = {_id: objectID};
+            let todoUpdate = {$set: {text: todo.text, done: todo.done}};
+            return todoCollection.findOneAndUpdate(todoFilter, todoUpdate);
+        });
 }
 
 function deleteTodo(id) {
-    let todoObjectId = new ObjectID(id);
-    return linkCollection.deleteMany({todo_id: todoObjectId})
-        .then(() => todoCollection.deleteOne({_id: todoObjectId}));
+    return hexStringToObjectID(id)
+        .then(objectID => {
+            let todoFilter = {todo_id: objectID};
+            return linkCollection.deleteMany(todoFilter)
+                .then(() => todoCollection.deleteOne(todoFilter));
+        });
 }
 
 function deleteAllTodos() {
@@ -50,17 +57,21 @@ function deleteAllTodos() {
 }
 
 function getTodoById(id) {
-    let todoObjectId = new ObjectID(id);
-    return todoCollection.find({_id: todoObjectId}).toArray()
-        .then(todos => {
-            if (todos.length === 0) {
-                throw new Error('no todo found with id ' + id);
-            }
-            let todo = todos[0];
-            return linkCollection.find({todo_id: todoObjectId}).toArray()
-                .then(links => {
-                    todo.users = links.map(link => link.user_id);
-                    return todo;
+    return hexStringToObjectID(id)
+        .then(objectID => {
+            let todoFilter = {_id: objectID};
+            return todoCollection.find(todoFilter).toArray()
+                .then(todos => {
+                    if (todos.length === 0) {
+                        throw new Error('no todo found with id ' + id);
+                    }
+                    let todo = todos[0];
+                    let linkFilter = {todo_id: objectID};
+                    return linkCollection.find(linkFilter).toArray()
+                        .then(links => {
+                            todo.assignedUsers = links.map(link => link.user_id);
+                            return todo;
+                        });
                 });
         });
 }
@@ -75,14 +86,21 @@ function addUser(user) {
 }
 
 function updateUser(id, user) {
-    let userObjectId = new ObjectID(id);
-    return userCollection.findOneAndUpdate({_id: userObjectId}, {$set: {name: user.name}});
+    return hexStringToObjectID(id)
+        .then(objectID => {
+            let userFilter = {_id: objectID};
+            let userUpdate = {$set: {name: user.name}};
+            return userCollection.findOneAndUpdate(userFilter, userUpdate);
+        });
 }
 
 function deleteUser(id) {
-    let userObjectId = new ObjectID(id);
-    return linkCollection.deleteMany({user_id: userObjectId})
-        .then(() => userCollection.deleteOne({_id: userObjectId}));
+    return hexStringToObjectID(id)
+        .then(objectID => {
+            let userFilter = {user_id: objectID};
+            return linkCollection.deleteMany(userFilter)
+                .then(() => userCollection.deleteOne(userFilter));
+        });
 }
 
 function deleteAllUsers() {
@@ -91,52 +109,77 @@ function deleteAllUsers() {
 }
 
 function getUserById(id) {
-    let userObjectId = new ObjectID(id);
-    return userCollection.find({_id: userObjectId}).toArray()
-        .then(users => {
-            if (users.length === 0) {
-                throw new Error('no user found with id ' + id);
-            }
-            let user = users[0];
-            return linkCollection.find({user_id: userObjectId}).toArray()
-                .then(links => {
-                    user.todos = links.map(link => link.todo_id);
-                    return user;
-                });
+    return hexStringToObjectID(id)
+        .then(objectID => {
+            let userFilter = {_id: objectID};
+            return userCollection.find(userFilter).toArray()
+                .then(users => {
+                    if (users.length === 0) {
+                        throw new Error('no user found with id ' + id);
+                    }
+                    let user = users[0];
+                    let linkFilter = {user_id: objectID};
+                    return linkCollection.find(linkFilter).toArray()
+                        .then(links => {
+                            user.assignedTodos = links.map(link => link.todo_id);
+                            return user;
+                        });
+                })
         });
 }
 
 function assignUserToTodo(userId, todoId) {
-    let userObjectId = new ObjectID(userId);
-    let todoObjectId = new ObjectID(todoId);
-    return linkCollection.find({user_id: userObjectId, todo_id: todoObjectId}).toArray()
-        .then(links => {
-            if (links.length === 0) {
-                return linkCollection.insertOne({user_id: userObjectId, todo_id: todoObjectId});
-            }
+    return hexStringToObjectID(userId)
+        .then(userObjectID => {
+            return hexStringToObjectID(todoId)
+                .then(todoObjectID => {
+                    let linkFilter = {user_id: userObjectID, todo_id: todoObjectID};
+                    return linkCollection.find(linkFilter).toArray()
+                        .then(links => {
+                            if (links.length === 0) {
+                                let linkDoc = {user_id: userObjectID, todo_id: todoObjectID};
+                                return linkCollection.insertOne(linkDoc);
+                            }
+                        });
+                });
         });
 }
 
 function unassignUserFromTodo(userId, todoId) {
-    let userObjectId = new ObjectID(userId);
-    let todoObjectId = new ObjectID(todoId);
-    return linkCollection.deleteMany({user_id: userObjectId, todo_id: todoObjectId});
+    return hexStringToObjectID(userId)
+        .then(userObjectID => {
+            return hexStringToObjectID(todoId)
+                .then(todoObjectID => {
+                    let linkFilter = {user_id: userObjectID, todo_id: todoObjectID};
+                    return linkCollection.deleteMany(linkFilter);
+                });
+        });
+}
+
+function hexStringToObjectID(hexString) {
+    return new Promise((resolve, reject) => {
+        try {
+            resolve(new ObjectID(hexString));
+        } catch (err) {
+            reject(err);
+        }
+    });
 }
 
 module.exports = {
-    openDatabase: openDatabase,
-    getTodos: getTodos,
-    addTodo: addTodo,
-    updateTodo: updateTodo,
-    deleteTodo: deleteTodo,
-    deleteAllTodos: deleteAllTodos,
-    getTodoById: getTodoById,
-    getUsers: getUsers,
-    addUser: addUser,
-    updateUser: updateUser,
-    deleteUser: deleteUser,
-    deleteAllUsers: deleteAllUsers,
-    getUserById: getUserById,
-    assignUserToTodo: assignUserToTodo,
-    unassignUserFromTodo: unassignUserFromTodo
+    openDatabase,
+    getTodos,
+    addTodo,
+    updateTodo,
+    deleteTodo,
+    deleteAllTodos,
+    getTodoById,
+    getUsers,
+    addUser,
+    updateUser,
+    deleteUser,
+    deleteAllUsers,
+    getUserById,
+    assignUserToTodo,
+    unassignUserFromTodo
 };

@@ -24,7 +24,7 @@
         //////// Implementation ////////
 
         this.$onInit = function () {
-            ctrl.assigned = ctrl.user.todos.indexOf(ctrl.todo._id) !== -1;
+            ctrl.assigned = ctrl.user.assignedTodos.indexOf(ctrl.todo._id) !== -1;
         }
 
         function toggleAssignment() {

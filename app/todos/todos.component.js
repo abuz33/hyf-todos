@@ -69,14 +69,14 @@
         function onDelete(id, ev) {
             backendService.getTodoById(id)
                 .then(function (todo) {
-                    var userCount = todo.users.length
+                    var userCount = todo.assignedUsers.length
                     var message;
                     if (userCount === 0) {
                         message = '\'' + todo.text + '\' is assigned to nobody.';
                     } else if (userCount === 1) {
                         message = '\'' + todo.text + '\' is assigned to 1 user.';
                     } else {
-                        message = '\'' + todo.text + '\' is assigned to ' + userCount + 'users.';
+                        message = '\'' + todo.text + '\' is assigned to ' + userCount + ' users.';
                     }
                     var confirm = $mdDialog.confirm()
                         .title('Delete todo?')

@@ -107,7 +107,7 @@ function getTodoById(id) {
             };
             return execQuery(usersForTodoSql, [id])
                 .then(users => {
-                    todo.users = users.map(user => user._id);
+                    todo.assignedUsers = users.map(user => user._id);
                     return todo;
                 });
         });
@@ -152,7 +152,7 @@ function getUserById(id) {
             let user = users[0];
             return execQuery(todosForUserSql, id)
                 .then(todos => {
-                    user.todos = todos.map(todo => todo._id);
+                    user.assignedTodos = todos.map(todo => todo._id);
                     return user;
                 });
         });
@@ -186,19 +186,19 @@ function execQuery(sql, args) {
 }
 
 module.exports = {
-    openDatabase: openDatabase,
-    getTodos: getTodos,
-    addTodo: addTodo,
-    updateTodo: updateTodo,
-    deleteTodo: deleteTodo,
-    deleteAllTodos: deleteAllTodos,
-    getTodoById: getTodoById,
-    getUsers: getUsers,
-    addUser: addUser,
-    updateUser: updateUser,
-    deleteUser: deleteUser,
-    deleteAllUsers: deleteAllUsers,
-    getUserById: getUserById,
-    assignUserToTodo: assignUserToTodo,
-    unassignUserFromTodo: unassignUserFromTodo
+    openDatabase,
+    getTodos,
+    addTodo,
+    updateTodo,
+    deleteTodo,
+    deleteAllTodos,
+    getTodoById,
+    getUsers,
+    addUser,
+    updateUser,
+    deleteUser,
+    deleteAllUsers,
+    getUserById,
+    assignUserToTodo,
+    unassignUserFromTodo
 }
