@@ -88,7 +88,7 @@ function sendIndexHtml(req, res) {
 
 function getTodos(req, res) {
     database.getTodos()
-        .then(todos => res.json({todos: todos}))
+        .then(todos => res.json({todos}))
         .catch(err => res.status(400).json(err));
 }
 
@@ -116,7 +116,7 @@ function addTodo(req, res) {
     }
     database.addTodo(todo)
         .then(() => database.getTodos())
-        .then(todos => res.json({todos: todos}))
+        .then(todos => res.json({todos}))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -127,7 +127,7 @@ function deleteTodo(req, res) {
     }
     database.deleteTodo(req.params.id)
         .then(() => database.getTodos())
-        .then(todos => res.json({todos: todos}))
+        .then(todos => res.json({todos}))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -156,7 +156,7 @@ function deleteAllTodos(req, res) {
 
 function getUsers(req, res) {
     database.getUsers()
-        .then(users => res.json({users: users}))
+        .then(users => res.json({users}))
         .catch(err => res.status(400).json(err));
 }
 
@@ -184,7 +184,7 @@ function addUser(req, res) {
     }
     database.addUser(user)
         .then(() => database.getUsers())
-        .then(users => res.json({users: users}))
+        .then(users => res.json({users}))
         .catch(err => res.status(400).send(err.message));
 }
 
@@ -195,7 +195,7 @@ function deleteUser(req, res) {
     }
     database.deleteUser(req.params.id)
         .then(() => database.getUsers())
-        .then(users => res.json({users: users}))
+        .then(users => res.json({users}))
         .catch(err => res.status(400).send(err.message));
 }
 

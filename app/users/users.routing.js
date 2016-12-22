@@ -4,11 +4,11 @@
     'use strict';
 
     angular.module('app')
-        .config(config);
+        .config(routing);
 
-    config.$inject = ['$stateProvider'];
+    routing.$inject = ['$stateProvider'];
 
-    function config($stateProvider) {
+    function routing($stateProvider) {
 
         $stateProvider
             .state('userTodos', {

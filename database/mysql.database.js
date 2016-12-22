@@ -60,13 +60,11 @@ function createTables() {
 function getTodos() {
     return execQuery('SELECT _id, text, done FROM todos ORDER BY _id')
         .then(results => {
-            return results.map(todo => {
-                return {
-                    _id: todo._id,
-                    text: todo.text,
-                    done: todo.done !== 0
-                };
-            });
+            return results.map(todo => ({
+                _id: todo._id,
+                text: todo.text,
+                done: todo.done !== 0
+            }));
         });
 }
 
@@ -81,7 +79,7 @@ function updateTodo(id, todo) {
 
 function deleteTodo(id) {
     return execQuery('DELETE FROM todo_user_links WHERE todo_id=?', [id])
-        .then(() =>  execQuery('DELETE FROM todos WHERE _id=?', [id]));
+        .then(() => execQuery('DELETE FROM todos WHERE _id=?', [id]));
 }
 
 function deleteAllTodos() {

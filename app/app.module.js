@@ -5,11 +5,11 @@
 
     angular.module('app', ['ui.router', 'ngMaterial'])
         .constant('appTitle', 'HYF Todos')
-        .config(config);
+        .config(routing);
 
-    config.$inject = ['$urlRouterProvider', '$stateProvider'];
+    routing.$inject = ['$urlRouterProvider', '$stateProvider'];
 
-    function config($urlRouterProvider, $stateProvider) {
+    function routing($urlRouterProvider, $stateProvider) {
         $urlRouterProvider.otherwise('/');
 
         $stateProvider
