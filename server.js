@@ -1,4 +1,3 @@
-'use strict';
 const express = require('express');
 const bodyParser = require('body-parser');
 const port = 8080;
@@ -210,10 +209,7 @@ function updateUser(req, res) {
         return;
     }
     database.updateUser(req.params.id, user)
-        .then(() => {
-            console.log(`user ${user.name} updated`);
-            res.sendStatus(204);
-        })
+        .then(() => res.sendStatus(204))
         .catch(err => res.status(400).send(err.message));
 }
 
